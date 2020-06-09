@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block head %}
+
+<title>Predictions</title>
+
+{% endblock %}
+
+{% block body %}
+
+<ul>
+   {% for i in range (1,4) %}
+    <li> Item {{ i }} </li>
+   {%  endfor %}
+</ul>
+
+<form action="/predict">
+  Your favorite Ted Talk:<br>
+  <input type="text" name="url" value="YouTube URL">
+  <br>
+
+  What is on your mind:<br>
+  <input type="text" name="topic" value="I am interested in hew human brain functions!">
+  <br><br>
+  <input type="submit" value="Submit">
+</form>
+
+{{ recommendation | safe}}
+
+{% endblock %}
