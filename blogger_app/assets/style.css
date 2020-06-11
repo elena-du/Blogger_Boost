@@ -216,11 +216,11 @@ a {
   cursor: pointer;
 }
 a:hover {
-  color: white;
+  color: #4C4C4C;
 }
 /* Buttons –––––––––––––––––––––––––––––––––––––––––––––––––– */
 .rc-slider-track{
-  background-color: white
+  background-color: #4C4C4C
 }
 
 .rc-slider-rail{
@@ -266,12 +266,12 @@ a:hover {
   outline: 0;
 }
 .button.button-primary, button.button-primary, input[type="submit"].button-primary, input[type="reset"].button-primary, input[type="button"].button-primary {
-  color: #FFF;
-  background-color: white;
+  color: #545151;
+  background-color: #4C4C4C;
   border-color: white;
 }
 .button.button-primary:hover, button.button-primary:hover, input[type="submit"].button-primary:hover, input[type="reset"].button-primary:hover, input[type="button"].button-primary:hover, .button.button-primary:focus, button.button-primary:focus, input[type="submit"].button-primary:focus, input[type="reset"].button-primary:focus, input[type="button"].button-primary:focus {
-  color: #FFF;
+  color: #545151;
   background-color: #1EAEDB;
   border-color: #1EAEDB;
 }
