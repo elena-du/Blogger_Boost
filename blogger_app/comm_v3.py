@@ -36,7 +36,7 @@ with open('../../data/blogger_com_data_330676_polarity.pkl', 'rb') as picklefile
     
 #df.index = pd.to_datetime(df['date'])
 
-def get_polarity_data(df, blogger_id='4162441'):
+def get_polarity_data(df, blogger_id='1270648'):
     
     try:
     
@@ -118,6 +118,8 @@ list_topics = df1['Prime Topic'].unique()
 
 e_list = plutchik.columns[2:]
 
+months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
 def get_options(list_topics):
     dict_list = []
     for i in list_topics:
@@ -134,7 +136,13 @@ app.layout = html.Div(
                               children=[
                                   html.Div(className='twelve columns div-user-controls', 
                                       children = [
-                                          html.H2('GET BETTER BLOGGING EXPERIENCE: learn about emotions you express and people alike around you')])]), 
+                                          html.H2('GET BETTER BLOGGING EXPERIENCE: learn about emotions you express and people alike around you'), 
+                                          html.Br(),
+                                          html.Br(),
+                                          dcc.Input(id='input1', type='text', placeholder='Your blogger ID'),
+                                          html.Br(),
+                                          html.Br(),
+                                          html.Div(id="my_community")])]), 
                      html.Div(className='row',
                               children=[
                                   html.Div(className='four columns div-user-controls',
@@ -148,18 +156,12 @@ app.layout = html.Div(
                                                html.P('Select one or more key topics you want to dig into'),
                                                dcc.Checklist(id='topicselector',
                                                              className='topicselector',
-                                                             options=get_options(list_topics),
-                                                             value=[],#[df1['prime_topic'].sort_values()[0]],
+                                                             options=get_options(list_topics), 
+                                                             value=[df1['Prime Topic'].sort_values()[0]],
                                                              labelStyle={'display': 'block'},
                                                              #style={'backgroundColor': 'darkgray'},
                                                              #labelStyle={'display':'inline-block'}
                                                       ),
-                                               html.Br(),
-                                               dcc.Input(id='input1', type='text'),
-                                               html.Br(),
-                                               html.Br(),
-                                               html.Br(),
-                                               html.Div(id="my_community")
                                                
                                                
                                                ]),
@@ -205,8 +207,10 @@ app.layout = html.Div(
                                              className='div-for-dropdown',
                                              children=[dcc.Dropdown(id='emotionselector', options=get_options(e_list),
                                                               multi=True, value=[],
-                                                              style={'backgroundColor': '#1E1E1E'},
-                                                              className='emotionselector'
+                                                              placeholder='Select emotions',
+                                                              #style={'backgroundColor': '#1E1E1E'},
+                                                              className='emotionselector', 
+                                                              #labelStyle={'display': 'block'},
                                                               ),
                                              ],
                                              style={'color': '#1E1E1E'})
@@ -220,7 +224,8 @@ app.layout = html.Div(
                                                                   template='plotly_dark').update_layout(
                                                                       {'plot_bgcolor': 'rgba(0, 0, 0, 0)',
                                                                        'paper_bgcolor': 'rgba(0, 0, 0, 0)'}
-                                            )), 
+                                            )),
+                                        html.Br(),
                                         dcc.Graph(id='change', config={'displayModeBar': False}, 
                                                    animate=True,
                                                    figure=px.scatter(
@@ -255,7 +260,17 @@ app.layout = html.Div(
                                          html.Br(),
                                          html.H2('MY UPS AND DOWNS'),
                                          html.P('Positivity and negativity I share in my blog.'),
-                                         html.P('Select one or more pimary emotions and see how they change from post to post.')
+                                         html.P('Select one or more pimary emotions and see how they change from post to post.'),
+                                         html.Div(
+                                             className='div-for-dropdown',
+                                             children=[dcc.Dropdown(id='monthselector', options=get_options(months),
+                                                              multi=True, value=[],#list(self.volumes["SOURCE"])[0]
+                                                              placeholder="Select months",
+                                                              style={'backgroundColor': '#1E1E1E'},
+                                                              className='monthselector'
+                                                              ),
+                                             ],
+                                             style={'color': '#1E1E1E'})
 
                                         ]
                                      ),
@@ -328,11 +343,11 @@ def update_graph(selected_checklist_value, input1):
                   template='plotly_dark',
                   paper_bgcolor='rgba(0, 0, 0, 0)',
                   plot_bgcolor='rgba(0, 0, 0, 0)',
-                  margin={'b': 15},
+                  #margin={'b': 15},
                   hovermode='x',
                   autosize=True,
-                  title={'text': 'My BLOGGER.COM Community', 'font': {'color': '#545151'}, 'x': 0.5},
-                  xaxis={'range': [df_sub.index.min(), df_sub.index.max()]},
+                  #title={'text': 'My BLOGGER.COM Community', 'font': {'color': '#545151'}, 'x': 0.5},
+                  #xaxis={'range': [df_sub.index.min(), df_sub.index.max()]},
               )
 
               }
@@ -423,36 +438,75 @@ def update_change(selected_dropdown_value, input1):
     return figure
 
 
+# @app.callback(Output('up_down', 'figure'),
+#               [Input("input1", "value")])
+# def update_change3(input1):
+#     ''' Draw traces of the feature 'change' based one the currently selected stocks '''
+    
+#     polarity1 = get_polarity_data(polarity, blogger_id=input1)
+    
+#     fig = go.Figure()
+
+#     months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    
+#     for month in months:
+#         print(month)
+#         fig.add_trace(go.Violin(x=polarity1['month'][polarity1['month'] == month],
+#                                 y=polarity1['polarity_compound_post'][polarity1['month'] == month],
+#                                 name=month,
+#                                 box_visible=True,
+#                                 meanline_visible=True))
+
+
+#     #fig = [val for sublist in fig for val in sublist]
+#     # Define Figure
+#     figure = {'data': fig,
+#               'layout': go.Layout(
+#                   #colorway=["#FA1117", '#045C8A', '#0F9406', '#F23D0C', '#BA8B0F', '#A85EF2', '#424141', '#179C9C'],
+#                   template='plotly_dark',
+#                   paper_bgcolor='rgba(0, 0, 0, 0)',
+#                   plot_bgcolor='rgba(0, 0, 0, 0)',
+#                   margin={'t': 50},
+#                   height=250,
+#                   #hovermode='x',
+#                   #hoverlabel=dict(bgcolor='#FD6A37'),
+#                   autosize=True,
+#                   title={'text': 'OVER MONTHS', 'font': {'color': 'white'}, 'x': 0.5},
+#                   #xaxis={'showticklabels': False, 'range': [df_sub.index.min(), df_sub.index.max()]},
+#               )
+#               }
+
+#     return figure
+
+
 @app.callback(Output('up_down', 'figure'),
-              [Input("input1", "value")])
-def update_change3(input1):
+              [Input('monthselector', 'value'),
+                Input("input1", "value")])
+               
+def update_change3(selected_dropdown_value, input1):
     ''' Draw traces of the feature 'change' based one the currently selected stocks '''
     
     polarity1 = get_polarity_data(polarity, blogger_id=input1)
-    
-    fig = go.Figure()
-
-    months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-    
-    for month in months:
-    
-        fig.add_trace(go.Violin(x=polarity1['month'][polarity1['month'] == month],
+    trace1 = []
+    # Draw and append traces for each stock
+    for month in selected_dropdown_value:
+        trace1.append(go.Violin(x=polarity1['month'][polarity1['month'] == month],
                                 y=polarity1['polarity_compound_post'][polarity1['month'] == month],
                                 name=month,
                                 box_visible=True,
                                 meanline_visible=True))
 
-
-    fig = [val for sublist in fig for val in sublist]
-    # Define Figure
-    figure = {'data': fig,
+    traces = [trace1]
+    data = [val for sublist in traces for val in sublist]
+        # Define Figure
+    figure = {'data': data,
               'layout': go.Layout(
                   #colorway=["#FA1117", '#045C8A', '#0F9406', '#F23D0C', '#BA8B0F', '#A85EF2', '#424141', '#179C9C'],
                   template='plotly_dark',
-                  paper_bgcolor='rgba(0, 0, 0, 0)',
+                  paper_bgcolor='rgba(0, 0, 0, 255)',
                   plot_bgcolor='rgba(0, 0, 0, 0)',
                   margin={'t': 50},
-                  height=250,
+                  #height=250,
                   #hovermode='x',
                   #hoverlabel=dict(bgcolor='#FD6A37'),
                   autosize=True,
@@ -462,7 +516,6 @@ def update_change3(input1):
               }
 
     return figure
-
 
 
 
