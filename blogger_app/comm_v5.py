@@ -5,6 +5,8 @@ Created on Tue Jun  9 15:28:37 2020
 
 @author: elena
 """
+
+
 import numpy as np
 import pandas as pd
 import pickle
@@ -148,7 +150,7 @@ e_list = plutchik.columns[2:]
 
 months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
-views = ['Positive', 'Negative', 'Positive Trend', 'Negative Trend']
+views = ['trace1', 'trace2', 'trace3', 'trace4']#['Positive', 'Negative', 'Positive Trend', 'Negative Trend']
 
 def get_options(list_topics):
     dict_list = []
@@ -212,7 +214,7 @@ app.layout = html.Div(
                                               dcc.Graph(id='topicmodel',
                                                         config={'displayModeBar': False}, 
                                                         animate=True,
-                                                        figure=px.scatter( 
+                                                        figure=px.scatter( width=1000, height=800,
                                                           template='plotly_dark').update_layout(
                                                               {'plot_bgcolor': 'rgba(0, 0, 0, 0)',
                                                                'paper_bgcolor': 'rgba(0, 0, 0, 0)'}
@@ -225,7 +227,10 @@ app.layout = html.Div(
                                               ])
                                   ]),
                                             
-                                                         
+                       html.Br(),
+                       html.Br(),
+                       html.Br(),
+                       html.Br(),
                        html.Div(className='row',
                               children=[
                                   html.Div(className='four columns div-user-controls',
@@ -402,12 +407,10 @@ def update_graph(selected_checklist_value, input1):
                                                opacity=0.5),
                                  opacity=0.4,
                                  name=topic,
-                                 text="My zodiac is " + 
-                                         df_sub['name'].map(str) + 
-                                         ". I am " + df_sub['age'] + 
+                                 text="I am " + df_sub['age'] + 
                                          " and " + df_sub['gender'] +
                                          ". My occupation is " + df_sub['occupation'] +
-                                         ". Search me by my ID " +
+                                         ". Search me by ID " +
                                          df_sub['blogger_id'],
                                  hovertemplate='<b><i>%{text}</i></b>',
                                  textposition='bottom center'))
@@ -612,25 +615,11 @@ def update_change3(selected_dropdown_value, input1):
                
 def update_change4(selected_dropdown_value, input1):
     ''' Draw traces of the feature 'change' based one the currently selected stocks '''
-    trace = []
     
     df = get_polarity_data2(polarity, blogger_id=input1)
 
     neg_model, neg_forecast = fb_profet(df, n_col=0)
     pos_model, pos_forecast = fb_profet(df, n_col=1)
-
-#     trace_extra = go.Scatter3d(x=df_sub[df_sub['blogger_id'] == input1]['xs'],
-#                                y=df_sub[df_sub['blogger_id'] == input1]['ys'],
-#                     z=df_sub[df_sub['blogger_id'] == input1]['zs'],
-#                     name='ME',
-#                     mode='markers', 
-#                     marker = dict(size=20, color='#F23B0A',
-#                                   line = dict(color = '#6B6B6B', width = 2),
-#                                   opacity=0.99),
-#                     text="ME",
-
-#                     hovertemplate='<b><i>It is...</i></b>'
-# )
     
     trace1 = go.Scatter(x=pos_model.history['ds'].dt.to_pydatetime(), y=pos_model.history['y'],
                     mode='markers',
@@ -663,28 +652,18 @@ def update_change4(selected_dropdown_value, input1):
                     line_color='#590404',
                     showlegend=False,
                     name='Negative Trend' )
-    trace.append(trace1)
-    trace.append(trace2)
+    # trace.append(trace1)
+    # trace.append(trace2)
+    # trace.append(trace3)
+    # trace.append(trace4)
     
-    traces = [trace]
-    data = [val for sublist in traces for val in sublist]
-    figure = {'data': data,
-              'layout': go.Layout(
-                  colorway=[ '#81F08B', '#D7F23A', '#CF696C', '#D4D4D4', '#F0CB69', '#69F0D0', '#F26A3A'],
-                  template='plotly_dark',
-                  paper_bgcolor='rgba(0, 0, 0, 0)',
-                  plot_bgcolor='rgba(0, 0, 0, 0)',
-                  #margin={'b': 15},
-                  hovermode='x',
-                  autosize=True,
-                  #title={'text': 'My BLOGGER.COM Community', 'font': {'color': '#545151'}, 'x': 0.5},
-                  #xaxis={'range': [df_sub.index.min(), df_sub.index.max()]},
-              )
+    traces_selected = []
+    for trace in selected_dropdown_value:
+             traces_selected.append(trace)
 
-              }
-    return figure
-
-    traces = [trace]
+    
+ 
+    traces = [traces_selected]
     data = [val for sublist in traces for val in sublist]
         # Define Figure
     figure = {'data': data,
@@ -705,65 +684,6 @@ def update_change4(selected_dropdown_value, input1):
 
     return figure
 
-# @app.callback(Output('new_traces', 'figure'),
-#               [Input('input1', 'value'), 
-#                Input('topicmodel', 'figure'),
-#                Input('topicselector', 'value')])
-# def update_graph1(input1, topicmodel, selected_checklist_value):
-
-#     df_sub2 = df1[df1['blogger_id'] == input1]
-    
-#     trace0 = go.Scatter3d(x=df_sub2['xs'],
-#                           y=df_sub2['ys'],
-#                           z=df_sub2['zs'], 
-#                           mode='markers',
-#                           opacity=0.99,
-#                           #name=topic,
-#                           text="ME",
-#                           hovertemplate='<b><i>%{text}</i></b>',
-#                           textposition='bottom center')
-
-#     trace = []
-#     df_sub = df1
-#     for topic in selected_checklist_value:
-#         trace.append(go.Scatter3d(x=df_sub[df_sub['prime_topic'] == topic]['xs'],
-#                                  y=df_sub[df_sub['prime_topic'] == topic]['ys'],
-#                                  z=df_sub[df_sub['prime_topic'] == topic]['zs'],
-#                                  mode='markers',
-#                                  marker = dict(size=10,  
-#                                                line = dict(color = '#4C4C4C', width = 3), 
-#                                                opacity=0.5),
-#                                  opacity=0.4,
-#                                  name=topic,
-#                                  text="My zodiac is " + 
-#                                          df_sub['name'].map(str) + 
-#                                          ". I am " + df_sub['age'] + 
-#                                          " and " + df_sub['gender'] +
-#                                          ". My occupation is " + df_sub['occupation'] +
-#                                          ". Search me by my ID " +
-#                                          df_sub['blogger_id'],
-#                                  hovertemplate='<b><i>%{text}</i></b>',
-#                                  textposition='bottom center'))
-    
-    
-#     traces = [trace, trace0]
-#     data = [val for sublist in traces for val in sublist]
-#     figure = {'data': data,
-#               'layout': go.Layout(
-#                   colorway=[ '#81F08B', '#D7F23A', '#CF696C', '#D4D4D4', '#F0CB69', '#69F0D0', '#F26A3A', 'white'],
-#                   template='plotly_dark',
-#                   paper_bgcolor='rgba(0, 0, 0, 0)',
-#                   plot_bgcolor='rgba(0, 0, 0, 0)',
-#                   margin={'b': 15},
-#                   #hovermode='x',
-#                   autosize=True,
-#                   title={'text': 'My BLOGGER.COM Community', 'font': {'color': 'white'}, 'x': 0.5},
-#                   xaxis={'range': [df_sub2.index.min(), df_sub2.index.max()]}
-#               )
-
-#               }
-
-#     return figure
 
 
 # Run the app
