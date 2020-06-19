@@ -144,7 +144,7 @@ html {
   font-size: 62.5%;
 }
 body {
-  font-size: 1.5em;
+  font-size: 22px;
  /* currently ems cause chrome bug misinterpreting rems on body element */
   line-height: 1.6;
   font-weight: 400;
@@ -430,14 +430,22 @@ body {
   height: 100%;
 }
 
-h1, h2, h3, h4, h5 {
-  font-family: "Open Sans Semi Bold";
+h1, h2, h3 {
+  font-family: "Comic Sans MS Semi Bold";
   letter-spacing: 2.1px;
-  font-size: 21px;
+  font-size: 28px;
   padding-left: 12px;
 }
+
+h4, h5 {
+  font-family: "Comic Sans MS Semi Bold";
+  letter-spacing: 2.1px;
+  font-size: 22px;
+  padding-left: 12px;
+}
+
 p {
-  font-family: "Open Sans Light";
+  font-family: "Comic Sans MS Light";
   font-weight: 400;
   font-size: 14px;
   padding-left: 12px;

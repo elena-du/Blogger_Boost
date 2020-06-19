@@ -727,7 +727,7 @@ def update_change4(viewselector, input1):
 
 #RUN THE APP
 if __name__ == '__main__':
-   app.run_server(debug=True, port=5083)
+   app.run_server(debug=False, port=5083)
 #
 
 

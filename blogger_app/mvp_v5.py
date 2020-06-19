@@ -188,6 +188,8 @@ app.layout = html.Div(
                                           html.Br(),
                                           html.Div(id="my_community", style={'color': '#AFF0C0', 'font-size': '1.7em'})
                                           ])]), 
+                     html.Br(),
+                     html.Br(),
                      html.Div(className='row',
                               
                               children=[

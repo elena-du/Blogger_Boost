@@ -13,6 +13,7 @@ import dash
 import dash_html_components as html
 import dash_core_components as dcc
 import plotly.express as px
+import retrying
 
 import calendar
 from fbprophet import Prophet
@@ -22,7 +23,7 @@ from dash.dependencies import Input, Output
 
 
 def get_polarity_data2(df, blogger_id='4162441'):
-    
+    print(df.head())
     try:
     
         df_sub = df[df['blogger_id']==blogger_id].sort_values(by='date', ascending = True)
@@ -49,16 +50,23 @@ def get_polarity_data2(df, blogger_id='4162441'):
 
 def fb_profet(df, n_col=2):
     
-    df_profet = df.iloc[:,n_col].reset_index()
-    df_profet.rename(columns={'date':'ds', df_profet.columns[1]:'y'}, inplace=True)
+    try:
     
-    model = Prophet()
-    model.fit(df_profet);
-    
-    future = model.make_future_dataframe(periods=int(np.floor(df.shape[0]*0.2)))
-    forecast = model.predict(future)
-    
-    return model, forecast
+        #print(df.head())
+        
+        df_profet = df.iloc[:,n_col].reset_index()
+        df_profet.rename(columns={'date':'ds', df_profet.columns[1]:'y'}, inplace=True)
+        
+        model = Prophet()
+        model.fit(df_profet);
+        
+        future = model.make_future_dataframe(periods=int(np.floor(df.shape[0]*0.2)))
+        forecast = model.predict(future)
+        return model, forecast
+        
+    except:
+        print('This is a fix for cold start.')
+        
 
 def get_options(list_topics):
     dict_list = []
@@ -69,8 +77,11 @@ def get_options(list_topics):
 with open('../../data/blogger_com_data_330676_polarity.pkl', 'rb') as picklefile:
     polarity = pickle.load(picklefile)
     
-views = ['trace1', 'trace2', 'trace3', 'trace4']#['Positive', 'Negative', 'Positive Trend', 'Negative Trend']    
+views = ['Posts: Positivity', 'Posts: Negativity', 'Positivity Trend', 'Negativity Trend']  
+ 
 app = dash.Dash(__name__)
+
+input1='1270648'
 
 # Layout
 
@@ -115,7 +126,8 @@ app.layout = html.Div(
                                      html.Div(
                                          className='div-for-dropdown',
                                          children=[dcc.Dropdown(id='viewselector', options=get_options(views),
-                                                          multi=True, value=views[0],#list(self.volumes["SOURCE"])[0]
+                                                          multi=True, 
+                                                          value=[],
                                                           placeholder="Select view",
                                                           style={'backgroundColor': '#1E1E1E'},
                                                           className='viewselector'
@@ -152,78 +164,71 @@ app.layout = html.Div(
 
 #Callbacks                                                                  
 @app.callback(Output('up_down2', 'figure'),
-              [Input('viewselector', 'value'),
+              [ Input('viewselector', 'value'),
                 Input("input1", "value")])
                
 def update_change4(viewselector, input1):
     
     df = get_polarity_data2(polarity, blogger_id=input1)
+    
 
     neg_model, neg_forecast = fb_profet(df, n_col=0)
     pos_model, pos_forecast = fb_profet(df, n_col=1)
-    
-    trace1 = go.Scatter(x=pos_model.history['ds'].dt.to_pydatetime(), y=pos_model.history['y'],
-                    mode='markers',
-                    opacity=0.8,
-                    #color='#BCE0BE',
-                    marker = dict(size=5, color='#BCE0BE'),
-                    name='Positive')
-    
-    trace2 = go.Scatter(x=neg_model.history['ds'].dt.to_pydatetime(), y=neg_model.history['y'],
-                    mode='markers',
-                    #color='#FCB6B7',
-                    marker = dict(size=5, color='#FCB6B7'),
-                    opacity=0.8,
-                    name='Negative')
-    
-    trace3 = go.Scatter(
-                    x=pos_forecast['ds'],
-                    y=pos_forecast['yhat_lower']+pos_forecast['yhat_upper'],
-                    fill='toself',
-                    fillcolor='#BCE0BE',
-                    line_color='#026105',
-                    name='Positive Trend',
-                    showlegend=False)
-    
-    trace4 = go.Scatter(
-                    x=neg_forecast['ds'],
-                    y=neg_forecast['yhat_lower']+neg_forecast['yhat_upper'],
-                    fill='toself',
-                    fillcolor='#FCB6B7',
-                    line_color='#590404',
-                    showlegend=False,
-                    name='Negative Trend' )
-    # trace.append(trace1)
-    # trace.append(trace2)
-    # trace.append(trace3)
-    # trace.append(trace4)
-    
-    traces_selected = []
-    for trace in viewselector:
-             traces_selected.append(trace)
 
+    
+    fig = go.Figure()
+    
+    if 'Posts: Positivity' in viewselector:
+        
+        fig.add_trace(go.Scatter(x=pos_model.history['ds'].dt.to_pydatetime(), y=pos_model.history['y'],
+                            mode='markers',
+                            opacity=0.8,
+                            #color='#BCE0BE',
+                            marker = dict(size=5, color='#BCE0BE'),
+                            name='Post Positivity'))
+        
+    if 'Posts: Negativity' in viewselector:
+        
+        fig.add_trace(go.Scatter(x=neg_model.history['ds'].dt.to_pydatetime(), y=neg_model.history['y'],
+                            mode='markers',
+                            #color='#FCB6B7',
+                            marker = dict(size=5, color='#FCB6B7'),
+                            opacity=0.8,
+                            name='Post Negativity'))
+    
+    if 'Positivity Trend' in viewselector:
+        
+        fig.add_trace(go.Scatter(
+            x=pos_forecast['ds'],
+            y=pos_forecast['yhat_lower']+pos_forecast['yhat_upper'],
+            fill='toself',
+            fillcolor='#BCE0BE',
+            line_color='#026105',
+            name='Positivity Trend',
+            showlegend=False,
+        ))
+    
+    if 'Negativity Trend' in viewselector:
+        
+        fig.add_trace(go.Scatter(
+            x=neg_forecast['ds'],
+            y=neg_forecast['yhat_lower']+neg_forecast['yhat_upper'],
+            fill='toself',
+            fillcolor='#FCB6B7',
+            line_color='#590404',
+            showlegend=False,
+            name='Negativity Trend',
+        ))
+        
+    fig.update_layout(template='plotly_dark', 
+                      #paper_bgcolor='rgba(0, 0, 0, 0)',
+                      #plot_bgcolor='rgba(0, 0, 0, 0)',
+                      margin={'t': 10, 'b': 50, 'l':10, 'r':10}, 
+                      height=400,
+                      width=800)
     
  
-    traces = [traces_selected]
-    data = [val for sublist in traces for val in sublist]
-        # Define Figure
-    figure = {'data': data,
-              'layout': go.Layout(
-                  #colorway=["#FA1117", '#045C8A', '#0F9406', '#F23D0C', '#BA8B0F', '#A85EF2', '#424141', '#179C9C'],
-                  template='plotly_dark',
-                  paper_bgcolor='rgba(0, 0, 0, 255)',
-                  plot_bgcolor='rgba(0, 0, 0, 0)',
-                  margin={'t': 50},
-                  #height=250,
-                  #hovermode='x',
-                  #hoverlabel=dict(bgcolor='#FD6A37'),
-                  autosize=True,
-                  title={'text': 'OVER MONTHS', 'font': {'color': 'white'}, 'x': 0.5},
-                  #xaxis={'showticklabels': False, 'range': [df_sub.index.min(), df_sub.index.max()]},
-              )
-              }
-
-    return figure
+    return fig
 
 if __name__ == '__main__':
-   app.run_server(debug=True, port=4445)
+   app.run_server(debug=False, port=4444)

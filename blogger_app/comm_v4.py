@@ -621,6 +621,8 @@ def update_change4(selected_dropdown_value, input1):
     neg_model, neg_forecast = fb_profet(df, n_col=0)
     pos_model, pos_forecast = fb_profet(df, n_col=1)
     
+    trace=[]
+    
     trace1 = go.Scatter(x=pos_model.history['ds'].dt.to_pydatetime(), y=pos_model.history['y'],
                     mode='markers',
                     opacity=0.8,
