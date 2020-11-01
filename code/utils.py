@@ -34,7 +34,6 @@ from sklearn.manifold import TSNE
 
 import matplotlib.pyplot as plt
 import seaborn as sns
-%matplotlib inline
 
 import nltk
 #nltk.download()
